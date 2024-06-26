@@ -9,6 +9,24 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get repository owner
+        id: get-owner
+        run: |
+          echo "https://api.github.com/repos/${{ github.repository }}"
+          echo "REPO_OWNER=$(curl -s https://api.github.com/repos/${{ github.repository }} | jq -r .owner.login)" >> $GITHUB_ENV
+
+      - name: Check if user is repository owner
+        id: validate
+        run: |
+          if [ "${{ github.actor }}" != "${{ env.REPO_OWNER }}" ]; then
+            echo "You are not the owner of the repository."
+            exit 1
+          else
+            echo "You are the owner of the repository."
+          fi
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
